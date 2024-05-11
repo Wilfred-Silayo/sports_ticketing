@@ -1,0 +1,202 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:sports_ticketing/models/match_model.dart';
+import 'package:sports_ticketing/models/stadium_model.dart';
+import 'package:sports_ticketing/models/ticket_model.dart';
+import 'package:sports_ticketing/models/user_model.dart';
+import 'package:sports_ticketing/pages/loading_page.dart';
+import 'package:sports_ticketing/providers/stadium_provider.dart';
+import 'package:sports_ticketing/providers/ticket_provider.dart';
+
+class TicketHistory extends ConsumerWidget {
+  final UserModel user;
+  final MatchModel match;
+  final String ticketId;
+  const TicketHistory({
+    super.key,
+    required this.match,
+    required this.ticketId,
+    required this.user,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final TicketModel? ticket = ref.watch(getTicketProvider(ticketId)).value;
+    final bool isLoading = ref.watch(userTicketControllerProvider);
+    final Stadium? stadium =
+        ref.watch(getStadiumProvider(match.stadiumId)).value;
+    final String matchToPlay = "${match.homeTeam} vs ${match.awayTeam}";
+    final double totalPrice = ticket!.amount;
+    final formattedPrice = NumberFormat("#,##0.00", "en_US").format(totalPrice);
+    final formattedTax =
+        NumberFormat("#,##0.00", "en_US").format(totalPrice / 10);
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        title: const Text("Ticket Preview"),
+      ),
+      body: stadium == null || isLoading
+          ? const Loader()
+          : ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Card(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Customer',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                user.username,
+                                style: const TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                user.email,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Card(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 3),
+                        const Text(
+                          'Ticket Items',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 3),
+                        const Divider(),
+                        ListTile(
+                          title: const Text("TicketNo:"),
+                          trailing: Text(
+                            ticket.ticketNo,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Match:"),
+                          trailing: Text(
+                            matchToPlay,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Date of Play:"),
+                          trailing: Text(
+                            "${match.timestamp.day}/${match.timestamp.month}/${match.timestamp.year}",
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Time of Play:"),
+                          trailing: Text(
+                            'Time: ${match.timestamp.hour}:${match.timestamp.minute < 10 ? '0${match.timestamp.minute}' : match.timestamp.minute}',
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Stadium:"),
+                          trailing: Text(
+                            stadium.name,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Seat Type:"),
+                          trailing: Text(
+                            ticket.seatType,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Seat Type:"),
+                          trailing: Text(
+                            ticket.seatNo.toString(),
+                          ),
+                        ),
+                        const Divider(),
+                        DefaultTextStyle.merge(
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  const Text("Total Amount"),
+                                  Text(
+                                    formattedPrice,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  const Text("Total Tax"),
+                                  Text(
+                                    formattedTax,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Card(
+                    color: ticket.isCancelled ||
+                            match.timestamp.isBefore(DateTime.now())
+                        ? Colors.red
+                        : Colors.grey[100],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            if (!ticket.isCancelled &&
+                                match.timestamp.isAfter(DateTime.now())) {
+                              ref
+                                  .read(userTicketControllerProvider.notifier)
+                                  .cancelTicket(
+                                      ticket:
+                                          ticket.copyWith(isCancelled: true),
+                                      context: context);
+                            } else if (ticket.isCancelled) {
+                              ref
+                                  .read(userTicketControllerProvider.notifier)
+                                  .deleteTicket(ticket, context);
+                            }
+                          },
+                          child: ticket.isCancelled
+                              ? const Text("Delete",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ))
+                              : const Text("Cancel"),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+    );
+  }
+}

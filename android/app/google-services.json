@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1048215517288",
+    "project_id": "sports-ticketing",
+    "storage_bucket": "sports-ticketing.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048215517288:android:8c05cc2c57d1cba8ece3dd",
+        "android_client_info": {
+          "package_name": "com.example.sports_ticketing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMc1UASyKZ_SupJ2UVeE-Su9RpaUE91x4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
