@@ -39,8 +39,8 @@ class SalesAPI {
   FutureEitherVoid releaseSeat(Sales sale) async {
     try {
       await _firestore.collection('sales').doc(sale.id).update({
-        'seatNo': FieldValue.arrayRemove([sale.seatNo]),
-        'ticketNo': FieldValue.arrayRemove([sale.ticketNo]),
+        'seatNo': FieldValue.arrayRemove(sale.seatNo),
+        'ticketNo': FieldValue.arrayRemove(sale.ticketNo),
       });
       return right(null);
     } catch (e, st) {

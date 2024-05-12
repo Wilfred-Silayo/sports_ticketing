@@ -7,6 +7,7 @@ import 'package:sports_ticketing/models/stadium_model.dart';
 import 'package:sports_ticketing/models/ticket_model.dart';
 import 'package:sports_ticketing/models/user_model.dart';
 import 'package:sports_ticketing/pages/loading_page.dart';
+import 'package:sports_ticketing/providers/sales_provider.dart';
 import 'package:sports_ticketing/providers/stadium_provider.dart';
 import 'package:sports_ticketing/providers/ticket_provider.dart';
 
@@ -121,7 +122,7 @@ class TicketHistory extends ConsumerWidget {
                           ),
                         ),
                         ListTile(
-                          title: const Text("Seat Type:"),
+                          title: const Text("Seat No:"),
                           trailing: Text(
                             ticket.seatNo.toString(),
                           ),
@@ -178,6 +179,7 @@ class TicketHistory extends ConsumerWidget {
                                       ticket:
                                           ticket.copyWith(isCancelled: true),
                                       context: context);
+                                      ref.read(salesControllerProvider.notifier).releaseSeat(context: context, ticket:ticket,stadium:stadium);
                             } else if (ticket.isCancelled) {
                               ref
                                   .read(userTicketControllerProvider.notifier)

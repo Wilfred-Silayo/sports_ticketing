@@ -33,7 +33,7 @@ class _SeatSelectionPageState extends ConsumerState<SeatSelectionPage> {
   @override
   Widget build(BuildContext context) {
     final String id =
-        '${widget.stadium.id}-${widget.match.matchId}-${widget.category}-A${widget.index}';
+        '${widget.stadium.id}-${widget.match.matchId}-${widget.category}-A${widget.index + 1}';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,

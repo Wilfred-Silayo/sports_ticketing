@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sports_ticketing/apis/sales_api.dart';
 import 'package:sports_ticketing/models/sales_model.dart';
+import 'package:sports_ticketing/models/stadium_model.dart';
+import 'package:sports_ticketing/models/ticket_model.dart';
 import 'package:sports_ticketing/utils/utils.dart';
 
 final salesControllerProvider = StateNotifierProvider<SalesController, bool>(
@@ -31,7 +33,7 @@ class SalesController extends StateNotifier<bool> {
     required int index,
     required int seatNo,
   }) async {
-    final String id = '$stadiumId-$matchId-$seatType-A$index';
+    final String id = '$stadiumId-$matchId-$seatType-A${index + 1}';
     final Sales sale = Sales(
         id: id,
         ticketNo: [ticketNo],
@@ -48,23 +50,25 @@ class SalesController extends StateNotifier<bool> {
 
   void releaseSeat({
     required BuildContext context,
-    required String matchId,
-    required String ticketNo,
-    required String stadiumId,
-    required String seatType,
-    required int seatNo,
+    required TicketModel ticket,
+    required Stadium stadium,
   }) async {
-    final String id = '$stadiumId-$matchId-$seatType';
+    final String input = ticket.seatType;
+    List<String> output = input.split(" ");
+    final String id =
+        '${stadium.id}-${ticket.match}-${output[0]}-${output[output.length - 1]}';
     final Sales sale = Sales(
         id: id,
-        ticketNo: [ticketNo],
-        seatNo: [seatNo],
-        seatType: seatType,
-        matchId: matchId,
-        stadiumId: stadiumId);
+        ticketNo: [ticket.ticketNo],
+        seatNo: [ticket.seatNo],
+        seatType: output[0],
+        matchId: ticket.match,
+        stadiumId: stadium.id);
     final res = await _saleAPI.releaseSeat(sale);
     res.fold(
-      (l) => showSnackBar(context, l.message),
+      (l) {
+      print(l.message);
+      return showSnackBar(context, l.message);},
       (r) => null,
     );
   }
