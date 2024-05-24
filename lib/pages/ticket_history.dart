@@ -7,6 +7,7 @@ import 'package:sports_ticketing/models/stadium_model.dart';
 import 'package:sports_ticketing/models/ticket_model.dart';
 import 'package:sports_ticketing/models/user_model.dart';
 import 'package:sports_ticketing/pages/loading_page.dart';
+import 'package:sports_ticketing/pages/next_match.dart';
 import 'package:sports_ticketing/providers/sales_provider.dart';
 import 'package:sports_ticketing/providers/stadium_provider.dart';
 import 'package:sports_ticketing/providers/ticket_provider.dart';
@@ -160,43 +161,72 @@ class TicketHistory extends ConsumerWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Card(
-                    color: ticket.isCancelled ||
-                            match.timestamp.isBefore(DateTime.now())
-                        ? Colors.red
-                        : Colors.grey[100],
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            if (!ticket.isCancelled &&
-                                match.timestamp.isAfter(DateTime.now())) {
-                              ref
-                                  .read(userTicketControllerProvider.notifier)
-                                  .cancelTicket(
-                                      ticket:
-                                          ticket.copyWith(isCancelled: true),
-                                      context: context);
-                                      ref.read(salesControllerProvider.notifier).releaseSeat(context: context, ticket:ticket,stadium:stadium);
-                            } else if (ticket.isCancelled) {
-                              ref
-                                  .read(userTicketControllerProvider.notifier)
-                                  .deleteTicket(ticket, context);
-                            }
-                          },
-                          child: ticket.isCancelled
-                              ? const Text("Delete",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ))
-                              : const Text("Cancel"),
-                        )
-                      ],
-                    ),
-                  ),
-                )
+  padding: const EdgeInsets.all(15.0),
+  child: Card(
+    color: ticket.isCancelled || match.timestamp.isBefore(DateTime.now())
+        ? Colors.red
+        : Colors.grey[100],
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero, 
+        ),
+        onPressed: () {
+          if (!ticket.isCancelled &&
+              match.timestamp.isAfter(DateTime.now())) {
+            ref
+                .read(userTicketControllerProvider.notifier)
+                .cancelTicket(
+                  ticket: ticket.copyWith(isCancelled: true),
+                  context: context,
+                );
+            ref
+                .read(salesControllerProvider.notifier)
+                .releaseSeat(context: context, ticket: ticket, stadium: stadium);
+          } else if (ticket.isCancelled ||match.timestamp.isBefore(DateTime.now())) {
+            ref
+                .read(userTicketControllerProvider.notifier)
+                .deleteTicket(ticket, context);
+          }
+        },
+        child: Container(
+          width: double.infinity, // Make the button as wide as the parent
+          child: Center(
+            child: Text(
+              ticket.isCancelled || match.timestamp.isBefore(DateTime.now()) ? "Delete" : "Cancel",
+              style: TextStyle(
+                color: ticket.isCancelled || match.timestamp.isBefore(DateTime.now()) ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+        ),
+      ),
+  ),
+),
+ticket.isCancelled ?
+Padding(
+  padding: const EdgeInsets.all(15.0),
+  child: InkWell(
+  onTap:(){
+  Navigator.push(context,MaterialPageRoute(builder:(context)=>NextMatch(matchModel:match),),);
+  },
+  child: Card(
+    color: Colors.green,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5.0),
+          child: Center(
+            child: Text(
+              "Rebook the ticket for the next match",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+      ),
+    ): const SizedBox(),
+
+
               ],
             ),
     );

@@ -12,6 +12,10 @@ final getMatchesProvider = StreamProvider(
   (ref) => ref.watch(matchControllerProvider.notifier).getMatches(),
 );
 
+final getNextMatchesProvider = StreamProvider.family(
+  (ref, MatchModel match) => ref.watch(matchControllerProvider.notifier).getNextMatches(match),
+);
+
 final searchMatchProvider = StreamProvider.family((ref, String query) {
   final matchController = ref.watch(matchControllerProvider.notifier);
   return matchController.searchMatch(query);
@@ -29,6 +33,10 @@ class MatchController extends StateNotifier<bool> {
 
   Stream<List<MatchModel>> getMatches() {
     return _matchAPI.getMatches();
+  }
+
+  Stream<List<MatchModel>> getNextMatches(MatchModel match) {
+    return _matchAPI.getNextMatches(match);
   }
 
   Future<MatchModel> getmatch(String id) async {

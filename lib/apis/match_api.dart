@@ -35,6 +35,28 @@ class MatchAPI {
         );
   }
 
+
+   Stream<List<MatchModel>> getNextMatches(MatchModel match) {
+     return _firestore
+      .collection('matches')
+      .where('timestamp', isGreaterThan: Timestamp.now())
+      .orderBy('timestamp', descending: false)
+      .snapshots()
+      .map(
+        (event) => event.docs.isEmpty
+            ? [] // Return empty list if no documents found
+            : event.docs
+                .map(
+                  (e) => MatchModel.fromMap(
+                    e.data(),
+                  ),
+                )
+                .where((snap) =>
+                    snap.homeTeam == match.homeTeam || snap.awayTeam == match.awayTeam)
+                .toList(),
+      );
+  }
+
   Future<MatchModel> getMatch(String id) async {
     final snapshot = await _firestore.collection("matches").doc(id).get();
     return MatchModel.fromMap(snapshot.data() as Map<String, dynamic>);
