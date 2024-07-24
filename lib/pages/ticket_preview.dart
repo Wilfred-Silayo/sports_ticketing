@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 import '../models/match_model.dart';
 import '../models/stadium_model.dart';
 
-class TicketPreview extends ConsumerWidget {
+class TicketPreview extends ConsumerStatefulWidget {
   const TicketPreview({
     Key? key,
     required this.blockName,
@@ -32,9 +32,15 @@ class TicketPreview extends ConsumerWidget {
   final MatchModel match;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TicketPreview> createState() => _TicketPreviewState();
+}
+
+class _TicketPreviewState extends ConsumerState<TicketPreview> {
+  @override
+  Widget build(BuildContext context) {
     final String ticketNo = const Uuid().v1();
-    final String matchToPlay = "${match.homeTeam} vs ${match.awayTeam}";
+    final String matchToPlay =
+        "${widget.match.homeTeam} vs ${widget.match.awayTeam}";
     final UserModel? user = ref.watch(currentUserDetailsProvider).value;
     final bool isLoading = ref.watch(userTicketControllerProvider);
     final bool isLoadingSale = ref.watch(salesControllerProvider);
@@ -45,10 +51,10 @@ class TicketPreview extends ConsumerWidget {
           onPressed: () {
             if (!isPaid) {
               // Logic for handling payment
-              ref.read(getpricesProvider(match.matchId)).when(
+              ref.read(getpricesProvider(widget.match.matchId)).when(
                 data: (prices) {
                   final double totalPrice;
-                  switch (category) {
+                  switch (widget.category) {
                     case 'VVIP':
                       totalPrice = prices.VVIP;
                       break;
@@ -72,27 +78,29 @@ class TicketPreview extends ConsumerWidget {
                   }
 
                   ref.read(userTicketControllerProvider.notifier).buyTicket(
-                        match: match.matchId,
+                        match: widget.match.matchId,
                         amount: totalPrice,
-                        seatNo: seatNumber,
-                        seatType: blockName,
+                        seatNo: widget.seatNumber,
+                        seatType: widget.blockName,
                         ticketNo: ticketNo,
                         userId: user!.uid,
                         context: context,
                       );
 
                   ref.read(salesControllerProvider.notifier).markAsSold(
-                        index: index,
+                        index: widget.index,
                         context: context,
-                        matchId: match.matchId,
-                        stadiumId: stadium.id,
+                        matchId: widget.match.matchId,
+                        stadiumId: widget.stadium.id,
                         ticketNo: ticketNo,
-                        seatType: category,
-                        seatNo: seatNumber,
+                        seatType: widget.category,
+                        seatNo: widget.seatNumber,
                       );
 
                   // Update isPaid to true after successful payment
-                  isPaid = true;
+                  setState(() {
+                    isPaid = true;
+                  });
 
                   // You can also navigate to the PdfPreviewPage here if needed
                 },
@@ -109,12 +117,12 @@ class TicketPreview extends ConsumerWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => PdfPreviewPage(
-                    match: match,
+                    match: widget.match,
                     amount: 0, // Provide appropriate amount
-                    seatNo: seatNumber,
-                    seatType: blockName,
+                    seatNo: widget.seatNumber,
+                    seatType: widget.blockName,
                     ticketNo: ticketNo,
-                    stadium: stadium,
+                    stadium: widget.stadium,
                     user: user!,
                   ),
                 ),
@@ -130,10 +138,10 @@ class TicketPreview extends ConsumerWidget {
       ),
       body: user == null || isLoading || isLoadingSale
           ? const Loader()
-          : ref.watch(getpricesProvider(match.matchId)).when(
+          : ref.watch(getpricesProvider(widget.match.matchId)).when(
                 data: (prices) {
                   final double totalPrice;
-                  switch (category) {
+                  switch (widget.category) {
                     case 'VVIP':
                       totalPrice = prices.VVIP;
                       break;
@@ -221,31 +229,31 @@ class TicketPreview extends ConsumerWidget {
                               ListTile(
                                 title: const Text("Date of Play:"),
                                 trailing: Text(
-                                  "${match.timestamp.day}/${match.timestamp.month}/${match.timestamp.year}",
+                                  "${widget.match.timestamp.day}/${widget.match.timestamp.month}/${widget.match.timestamp.year}",
                                 ),
                               ),
                               ListTile(
                                 title: const Text("Time of Play:"),
                                 trailing: Text(
-                                  'Time: ${match.timestamp.hour}:${match.timestamp.minute < 10 ? '0${match.timestamp.minute}' : match.timestamp.minute}',
+                                  'Time: ${widget.match.timestamp.hour}:${widget.match.timestamp.minute < 10 ? '0${widget.match.timestamp.minute}' : widget.match.timestamp.minute}',
                                 ),
                               ),
                               ListTile(
                                 title: const Text("Stadium:"),
                                 trailing: Text(
-                                  stadium.name,
+                                  widget.stadium.name,
                                 ),
                               ),
                               ListTile(
                                 title: const Text("Seat Type:"),
                                 trailing: Text(
-                                  blockName,
+                                  widget.blockName,
                                 ),
                               ),
                               ListTile(
                                 title: const Text("Seat Type:"),
                                 trailing: Text(
-                                  seatNumber.toString(),
+                                  widget.seatNumber.toString(),
                                 ),
                               ),
                               const Divider(),
