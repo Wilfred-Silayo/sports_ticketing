@@ -7,11 +7,13 @@ import 'package:sports_ticketing/pages/home_page.dart';
 import 'package:sports_ticketing/pages/loading_page.dart';
 import 'package:sports_ticketing/pages/login_page.dart';
 import 'package:sports_ticketing/providers/auth_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform, 
   );
   runApp(
     const ProviderScope(

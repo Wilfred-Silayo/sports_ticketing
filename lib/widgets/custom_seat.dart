@@ -31,7 +31,8 @@ class CustomSeat extends ConsumerStatefulWidget {
 class _CustomSeatState extends ConsumerState<CustomSeat> {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return
+     InkWell(
       onTap: () {
         widget.isSold
             ? showSnackBar(context, "Oops! The seat is sold")
